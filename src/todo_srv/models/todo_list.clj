@@ -1,12 +1,16 @@
-(ns todo-srv.models.list)
+(ns todo-srv.models.todo-list)
 
 ;; Temporary in-memory db
 (defonce lists (atom {}))
 (defonce counter (atom 0))
 
+(defn get-list
+  [id]
+  (get @lists id nil))
+
 (defn create-list
   [name]
-  (let [id (swap! counter inc)
+  (let [id (str (swap! counter inc))
         l {:name name
            :_id id}]
     (swap! lists conj [id l])
