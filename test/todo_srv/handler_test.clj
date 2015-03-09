@@ -22,7 +22,19 @@
                                        (get body "_id")))))
       (is (= (get body "name")
              name))))
+
   (testing "POST /lists without name field"
     (let [response (app (mock/request :post "/lists"))]
       (is (= (:status response) 400))))
-  (testing "GET /lists/:id"))
+
+  (testing "GET /lists/:id"
+    (let [response (app (mock/request :post "/lists" {:name "test"}))
+          body (parse-string (:body response))
+          id (get body "_id")
+          get-uri (format "/lists/%s" id)
+          response (app (mock/request :get get-uri))]
+      (is (= (:status response) 200))
+      (is (= (-> response
+                 :body
+                 parse-string)
+             body)))))
