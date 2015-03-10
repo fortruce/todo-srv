@@ -4,34 +4,35 @@
             [liberator.core :refer [defresource]])
   (:import [java.net URL]))
 
-(defn- absolute-url [req loc]
+(defn absolute-url [req loc]
   (str (URL. (URL. (request-url req))
              loc)))
 
-(defn- contains-params?
-  [req & params]
-  (let [params (apply hash-set params)]
-    (every? #(get-in req [:params %] nil)
-            params)))
-
-(defn- create-list [name]
+(defn create-list [name]
   (todo-list/create-list name))
 
-(defn- get-list-entry [id]
+(defn get-list-entry [id]
   (todo-list/get-list id))
+
+(defn list-resource-malformed?
+  [ctx]
+  (let [name (get-in ctx [:request :params :name] nil)]
+    (clojure.string/blank? name)))
+
+(defn list-resource-post!
+  [ctx]
+  (let [l  (create-list (get-in ctx [:request :params :name]))]
+    {:location (absolute-url (:request ctx)
+                             (format "/lists/%s" (:_id l)))
+     ::list l}))
+  
 
 (defresource list-resource
   :allowed-methods [:post]
   :available-media-types ["application/json"]
-  :malformed? (fn [ctx]
-                (not (contains-params? (:request ctx)
-                                   :name)))
-  :post! (fn [ctx]
-           (let [l  (create-list (get-in ctx [:request :params :name]))]
-             {:location (absolute-url (:request ctx)
-                                      (format "/lists/%s" (:_id l)))
-              :list l}))
-  :handle-created :list)
+  :handle-created ::list
+  :malformed? list-resource-malformed?
+  :post! list-resource-post!)
 
 (defresource list-entry [id]
   :allowed-methods [:get]
