@@ -1,18 +1,14 @@
 (ns todo-srv.resources.todo-list
-  (:require [todo-srv.models.todo-list :as todo-list]
+  (:require [todo-srv.models.todo-list :as m]
             [ring.util.request :refer [request-url]]
             [liberator.core :refer [defresource]])
   (:import [java.net URL]))
 
-(defn absolute-url [req loc]
-  (str (URL. (URL. (request-url req))
-             loc)))
-
-(defn create-list [name]
-  (todo-list/create-list name))
-
-(defn get-list-entry [id]
-  (todo-list/get-list id))
+(defn absolute-url
+  ([req] (absolute-url req "/"))
+  ([req uri]
+   (str (URL. (URL. (request-url req))
+              (if (clojure.string/blank? uri) "/" uri)))))
 
 (defn list-resource-malformed?
   [ctx]
@@ -21,10 +17,16 @@
 
 (defn list-resource-post!
   [ctx]
-  (let [l  (create-list (get-in ctx [:request :params :name]))]
+  (let [l  (m/create-list (get-in ctx [:request :params :name]))]
     {:location (absolute-url (:request ctx)
                              (format "/lists/%s" (:_id l)))
      ::list l}))
+
+(defn list-entry-exists?
+  [id]
+  (let [e (m/get-list id)]
+               (if-not (nil? e)
+                 {::entry e})))
   
 
 (defresource list-resource
@@ -37,8 +39,5 @@
 (defresource list-entry [id]
   :allowed-methods [:get]
   :available-media-types ["application/json"]
-  :exists? (fn [_]
-             (let [e (get-list-entry id)]
-               (if-not (nil? e)
-                 {::entry e})))
+  :exists? (fn [_] (list-entry-exists? id))
   :handle-ok ::entry)

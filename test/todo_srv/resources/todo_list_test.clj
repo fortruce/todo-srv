@@ -1,9 +1,27 @@
 (ns todo-srv.resources.todo-list-test
   (:require [clojure.test :refer :all]
+            [todo-srv.models.todo-list :as m]
             [todo-srv.resources.todo-list :refer :all]))
 
+(deftest test-absolute-url
+  (testing "should concat loc to host url found in request"
+    (let [request {:headers {"host" "localhost.com"}
+                   :scheme "http"
+                   :uri "/lists/test"}]
+      (is (= "http://localhost.com/test"
+             (absolute-url request "/test")))
+      (is (= "http://localhost.com/"
+             (absolute-url request))))))
+
 (deftest test-list-entry-exists?
-  (with-redefs []))
+  (testing "should set ::entry to entry if exists"
+    (let [l {:_id 1}]
+      (with-redefs [m/get-list (constantly l)]
+        (is (= (:todo-srv.resources.todo-list/entry (list-entry-exists? 1))
+               l)))))
+  (testing "should return nil if entry doesn't exist"
+    (with-redefs [m/get-list (constantly nil)]
+      (is (= nil (list-entry-exists? 1))))))
 
 (deftest test-list-resource-malformed?
   (let [ctx (fn [n] {:request {:params {:name n}}})]
@@ -17,7 +35,7 @@
 (deftest test-list-resource-post!
   (let [id 1
         l {:_id id}]
-    (with-redefs [create-list (fn [_] l)
+    (with-redefs [m/create-list (constantly l)
                   absolute-url (fn [_ loc] loc)]
       (let [res (list-resource-post! {:request {:params {:name "Test List"}}})]
         (testing "should set :location to absolute url of resource"
