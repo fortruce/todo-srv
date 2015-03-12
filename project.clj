@@ -7,12 +7,17 @@
                  [liberator "0.12.2"]
                  [cheshire "5.4.0"]
                  [ring/ring-json "0.3.1"]
-                 [ring/ring-defaults "0.1.2"]]
+                 [ring/ring-defaults "0.1.2"]
+                 [ragtime "0.3.8"]
+                 [org.clojure/java.jdbc "0.3.6"]
+                 [postgresql "9.3-1102.jdbc41"]]
   :plugins [[lein-ring "0.9.2"]
-            [quickie "0.3.6"]]
+            [ragtime/ragtime.lein "0.3.8"]]
   :ring {:handler todo-srv.handler/app
          :nrepl {:start? true
                  :port 3333}}
+  :ragtime {:migrations ragtime.sql.files/migrations
+            :database "jdbc:postgresql://localhost:5432/test?user=postgres&password=password"}
   :profiles
   {:dev {:dependencies [[javax.servlet/servlet-api "2.5"]
                         [ring-mock "0.1.5"]]}})
