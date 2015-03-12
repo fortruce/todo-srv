@@ -10,6 +10,10 @@
   (str (URL. (URL. (request-url request))
              location)))
 
+(defn- json-response-body
+  [response]
+  (parse-string (:body response)))
+
 (deftest test-list-endpoint
   (testing "POST /lists"
     (let [name "Test list"
@@ -28,13 +32,14 @@
       (is (= (:status response) 400))))
 
   (testing "GET /lists/:id"
-    (let [response (app (mock/request :post "/lists" {:name "test"}))
-          body (parse-string (:body response))
+    (let [init-resp (app (mock/request :post "/lists" {:name "test"}))
+          body (json-response-body init-resp)
           id (get body "_id")
           get-uri (format "/lists/%s" id)
           response (app (mock/request :get get-uri))]
       (is (= (:status response) 200))
-      (is (= (-> response
-                 :body
-                 parse-string)
-             body)))))
+      (is (= (json-response-body response)
+             body))
+      (is (= (get (json-response-body response)
+                  "name")
+             "test")))))
