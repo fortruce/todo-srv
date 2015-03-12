@@ -1,5 +1,5 @@
-(ns todo-srv.resources.todo-list
-  (:require [todo-srv.models.todo-list :as m]
+(ns todo-srv.resources.list
+  (:require [todo-srv.models.list :as m]
             [ring.util.request :refer [request-url]]
             [liberator.core :refer [defresource]])
   (:import [java.net URL]))

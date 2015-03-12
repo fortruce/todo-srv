@@ -1,4 +1,4 @@
-(ns todo-srv.models.todo-list)
+(ns todo-srv.models.list)
 
 ;; Temporary in-memory db
 (defonce lists (atom {}))

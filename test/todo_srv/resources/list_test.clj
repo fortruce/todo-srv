@@ -1,7 +1,7 @@
-(ns todo-srv.resources.todo-list-test
+(ns todo-srv.resources.list-test
   (:require [clojure.test :refer :all]
-            [todo-srv.models.todo-list :as m]
-            [todo-srv.resources.todo-list :refer :all]))
+            [todo-srv.models.list :as m]
+            [todo-srv.resources.list :as r :refer :all]))
 
 (deftest test-absolute-url
   (testing "should concat loc to host url found in request"
@@ -17,7 +17,7 @@
   (testing "should set ::entry to entry if exists"
     (let [l {:_id 1}]
       (with-redefs [m/get-list (constantly l)]
-        (is (= (:todo-srv.resources.todo-list/entry (list-entry-exists? 1))
+        (is (= (::r/entry (list-entry-exists? 1))
                l)))))
   (testing "should return nil if entry doesn't exist"
     (with-redefs [m/get-list (constantly nil)]
@@ -43,4 +43,4 @@
                  (:location res))))
         (testing "should set ::list to newly created list"
           (is (= l
-                 (:todo-srv.resources.todo-list/list res))))))))
+                 (::r/list res))))))))
