@@ -1,14 +1,14 @@
 (ns todo-srv.handler
   (:require [compojure.core :refer :all]
             [compojure.route :as route]
-            [todo-srv.resources.todo-list :as todo-list]
+            [todo-srv.resources.list :as list]
             [liberator.dev :refer [wrap-trace]]
             [ring.middleware.defaults :refer [wrap-defaults api-defaults]]
             [ring.middleware.json :refer [wrap-json-response]]))
 
 (defroutes list-routes
-  (ANY "/lists" [] todo-list/list-resource)
-  (ANY "/lists/:id" [id] (todo-list/list-entry id)))
+  (ANY "/lists" [] list/list-resource)
+  (ANY "/lists/:id" [id] (list/list-entry id)))
 
 (defroutes app-routes
   list-routes
