@@ -20,12 +20,12 @@
          :nrepl {:start? true
                  :port 3333}}
   
-  :ragtime {:migrations ragtime.sql.files/migrations
-            :database (System/getenv "DB_URL")}
+  :ragtime {:migrations ragtime.sql.files/migrations}
   
   :profiles
   {:dev {:dependencies [[javax.servlet/servlet-api "2.5"]
                         [ring-mock "0.1.5"]]
          :ragtime {:database "jdbc:postgresql://localhost:5432/dev?user=postgres&password=password"}}
    :test {:dependencies [[ring-mock "0.1.5"]]
-          :ragtime {:database "jdbc:postgresql://localhost:5432/test?user=postgres&password=password"}}})
+          :ragtime {:database "jdbc:postgresql://localhost:5432/test?user=postgres&password=password"}}
+   :production {:ragtime {:database (System/getenv "DB_URL")}}})
