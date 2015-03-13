@@ -11,9 +11,11 @@
                  [ring/ring-defaults "0.1.2"]
                  [ragtime "0.3.8"]
                  [org.clojure/java.jdbc "0.3.6"]
+                 [environ "1.0.0"]
                  [postgresql "9.3-1102.jdbc41"]]
   
   :plugins [[lein-ring "0.9.2"]
+            [lein-environ "1.0.0"]
             [ragtime/ragtime.lein "0.3.8"]]
   
   :ring {:handler todo-srv.handler/app
@@ -25,7 +27,13 @@
   :profiles
   {:dev {:dependencies [[javax.servlet/servlet-api "2.5"]
                         [ring-mock "0.1.5"]]
-         :ragtime {:database "jdbc:postgresql://localhost:5432/dev?user=postgres&password=password"}}
+         :ragtime {:database "jdbc:postgresql://localhost:5432/dev?user=postgres&password=password"}
+         :env {:db-url "//localhost:5432/dev"
+               :db-user "postgres"
+               :db-pass "password"}}
    :test {:dependencies [[ring-mock "0.1.5"]]
-          :ragtime {:database "jdbc:postgresql://localhost:5432/test?user=postgres&password=password"}}
+          :ragtime {:database "jdbc:postgresql://localhost:5432/test?user=postgres&password=password"}
+          :env {:db-url "//localhost:5432/test"
+                :db-user "postgres"
+                :db-pass "password"}}
    :production {:ragtime {:database (System/getenv "DB_URL")}}})
