@@ -1,17 +1,22 @@
-(ns todo-srv.models.list)
+(ns todo-srv.models.list
+  (:require [clojure.java.jdbc :as sql]
+            [todo-srv.database :refer [db]]
+            [clj-time.coerce :as c]))
 
-;; Temporary in-memory db
-(defonce lists (atom {}))
-(defonce counter (atom 0))
+(defn- convert-timestamps
+  [res]
+  (reduce #(update-in %1 [%2] (comp str c/from-sql-time)) res [:updated_at :created_at]))
+
+(defn- convert-first
+  [query]
+  (-> query
+      first
+      convert-timestamps))
 
 (defn get-list
   [id]
-  (get @lists id nil))
+  (convert-first (sql/query db ["SELECT * FROM lists WHERE id = ? LIMIT 1" id])))
 
 (defn create-list
   [name]
-  (let [id (swap! counter inc)
-        l {:name name
-           :_id id}]
-    (swap! lists conj [id l])
-    l))
+  (convert-first (sql/insert! db "lists" {:name name})))
