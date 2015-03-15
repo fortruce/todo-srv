@@ -16,7 +16,8 @@
   
   :plugins [[lein-ring "0.9.2"]
             [lein-environ "1.0.0"]
-            [ragtime/ragtime.lein "0.3.8"]]
+            [ragtime/ragtime.lein "0.3.8"]
+            [clj-time "0.9.0"]]
   
   :ring {:handler todo-srv.handler/app
          :nrepl {:start? true
