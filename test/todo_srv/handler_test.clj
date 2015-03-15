@@ -3,8 +3,11 @@
             [ring.mock.request :as mock]
             [ring.util.request :refer [request-url]]
             [cheshire.core :refer [parse-string]]
+            [todo-srv.database.utils :refer [clean-database]]
             [todo-srv.handler :refer :all])
   (:import [java.net URL]))
+
+(use-fixtures :each clean-database)
 
 (defn- absolute-url [request location]
   (str (URL. (URL. (request-url request))
@@ -34,7 +37,7 @@
   (testing "GET /lists/:id"
     (let [init-resp (app (mock/request :post "/lists" {:name "test"}))
           body (json-response-body init-resp)
-          id (get body "_id")
+          id (get body "id")
           get-uri (format "/lists/%s" id)
           response (app (mock/request :get get-uri))]
       (is (= (:status response) 200))
