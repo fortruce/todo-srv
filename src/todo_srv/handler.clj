@@ -8,7 +8,7 @@
 
 (defroutes list-routes
   (ANY "/lists" [] list/list-resource)
-  (ANY "/lists/:id" [id] (list/list-entry id)))
+  (ANY "/lists/:id" [id] (list/list-entry (Integer/parseInt id))))
 
 (defroutes app-routes
   list-routes

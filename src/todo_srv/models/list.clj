@@ -10,7 +10,7 @@
 
 (defn create-list
   [name]
-  (let [id (str (swap! counter inc))
+  (let [id (swap! counter inc)
         l {:name name
            :_id id}]
     (swap! lists conj [id l])
