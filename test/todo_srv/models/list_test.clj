@@ -14,3 +14,10 @@
           l (create-list name)]
       (is (= (:name (first (sql/query db ["SELECT name FROM lists WHERE id = ?" (:id l)])))
             name)))))
+
+(deftest test-get-list
+  (testing "should get list with 'id'"
+    (let [{id :id} (create-list "test")]
+      (is (= "test" (:name (get-list id))))))
+  (testing "should return nil if no 'id' found"
+    (is (nil? (get-list 100)))))

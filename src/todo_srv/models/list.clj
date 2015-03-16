@@ -9,7 +9,7 @@
 
 (defn- convert-first
   [query]
-  (-> query
+  (some-> query
       first
       convert-timestamps))
 
