@@ -17,9 +17,9 @@
 
 (defn list-resource-post!
   [ctx]
-  (let [l  (m/create-list (get-in ctx [:request :params :name]))]
+  (let [l  (m/create-list! (get-in ctx [:request :params :name]))]
     {:location (absolute-url (:request ctx)
-                             (format "/lists/%s" (:_id l)))
+                             (format "/lists/%s" (:id l)))
      ::list l}))
 
 (defn list-entry-exists?
@@ -37,7 +37,8 @@
   :post! list-resource-post!)
 
 (defresource list-entry [id]
-  :allowed-methods [:get]
+  :allowed-methods [:get :delete]
   :available-media-types ["application/json"]
   :exists? (fn [_] (list-entry-exists? id))
-  :handle-ok ::entry)
+  :handle-ok ::entry
+  :delete! (fn [_] (m/delete-list! id)))

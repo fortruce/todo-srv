@@ -15,7 +15,7 @@
 
 (deftest test-list-entry-exists?
   (testing "should set ::entry to entry if exists"
-    (let [l {:_id 1}]
+    (let [l {:id 1}]
       (with-redefs [m/get-list (constantly l)]
         (is (= (::r/entry (list-entry-exists? 1))
                l)))))
@@ -33,14 +33,13 @@
      (is (= false (list-resource-malformed? (ctx "Name")))))))
 
 (deftest test-list-resource-post!
-  (let [id 1
-        l {:_id id}]
-    (with-redefs [m/create-list (constantly l)
+  (let [{id :id :as l} {:id 1}]
+    (with-redefs [m/create-list! (constantly l)
                   absolute-url (fn [_ loc] loc)]
       (let [res (list-resource-post! {:request {:params {:name "Test List"}}})]
         (testing "should set :location to absolute url of resource"
           (is (= (format "/lists/%s" id)
                  (:location res))))
         (testing "should set ::list to newly created list"
-          (is (= l
-                 (::r/list res))))))))
+          (is (= l (::r/list res))))))))
+
