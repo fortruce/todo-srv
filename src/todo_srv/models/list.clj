@@ -13,10 +13,16 @@
       first
       convert-timestamps))
 
+(defonce ^:private lists-table :lists)
+
 (defn get-list
   [id]
   (convert-first (sql/query db ["SELECT * FROM lists WHERE id = ? LIMIT 1" id])))
 
 (defn create-list
   [name]
-  (convert-first (sql/insert! db "lists" {:name name})))
+  (convert-first (sql/insert! db lists-table {:name name})))
+
+(defn delete-list
+  [id]
+  (sql/delete! db lists-table ["id = ?" id]))

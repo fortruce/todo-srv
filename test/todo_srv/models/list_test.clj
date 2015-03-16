@@ -21,3 +21,9 @@
       (is (= "test" (:name (get-list id))))))
   (testing "should return nil if no 'id' found"
     (is (nil? (get-list 100)))))
+
+(deftest test-delete-list
+  (testing "should delete list with 'id'"
+    (let [{id :id} (create-list "test")]
+      (delete-list id)
+      (is (= nil (first (sql/query db ["SELECT * FROM lists WHERE id = ?" id])))))))
