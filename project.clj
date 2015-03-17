@@ -17,7 +17,10 @@
   :plugins [[lein-ring "0.9.2"]
             [lein-environ "1.0.0"]
             [ragtime/ragtime.lein "0.3.8"]
-            [clj-time "0.9.0"]]
+            [clj-time "0.9.0"]
+            [speclj "3.2.0"]]
+
+  :test-paths ["spec"]
   
   :ring {:handler todo-srv.handler/app
          :nrepl {:start? true
@@ -27,7 +30,8 @@
   
   :profiles
   {:dev {:dependencies [[javax.servlet/servlet-api "2.5"]
-                        [ring-mock "0.1.5"]]
+                        [ring-mock "0.1.5"]
+                        [speclj "3.2.0"]]
          :ragtime {:database "jdbc:postgresql://localhost:5432/dev?user=postgres&password=password"}
          :env {:db-url "//localhost:5432/dev"
                :db-user "postgres"
