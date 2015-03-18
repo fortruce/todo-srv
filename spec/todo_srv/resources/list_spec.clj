@@ -42,3 +42,18 @@
 
   (it "is is well formed if :name is present"
       (should-not (list-resource-malformed? (@ctx "test")))))
+
+(describe "list-resource-post!"
+
+  (with-all! test-list {:id 1})
+  (with-all! ctx {:request {:params {:name "test"}}})
+
+  (around [it]
+          (with-redefs [m/create-list! (constantly @test-list)
+                        absolute-url #(str %2)]
+            (it)))
+
+  (it "sets :location to absolute url of resource"
+      (should= "/lists/1" (:location (list-resource-post! @ctx))))
+  (it "sets ::list to newly created list"
+      (should= @test-list (::r/list (list-resource-post! @ctx)))))
