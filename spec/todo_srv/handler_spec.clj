@@ -3,13 +3,9 @@
             [todo-srv.handler :refer :all]
             [ring.mock.request :as mock]
             [cheshire.core :refer [parse-string]]
-            [ring.util.request :refer [request-url]]
-            [todo-srv.database.utils :refer [reset-db]])
-  (:import [java.net URL]))
-
-(defn- absolute-url [request location]
-  (str (URL. (URL. (request-url request))
-             location)))
+            [todo-srv.models.list :as m]
+            [todo-srv.utils :refer [absolute-url]]
+            [todo-srv.database.utils :refer [reset-db]]))
 
 (defn- json-response-body
   [response]
@@ -22,7 +18,7 @@
       (get key)))
 
 (describe "/lists"
-
+  
   (after-all
     (reset-db))
 
@@ -31,28 +27,44 @@
   (with-all id (response-get @resp "id"))
   (with-all uri (format "/lists/%s" @id))
 
-  (context "POST /lists"
-           (it "status 201"
-               (should= 201 (:status @resp)))
-           (it "sets Location header to absolute url"
-               (should= (absolute-url @req @uri)
-                        (get-in @resp [:headers "Location"])))
-           (it "returns the resource in the body"
-               (should= "test"
-                        (response-get @resp "name"))))
+  (context "POST"
+    
+    (it "status 201"
+        (should= 201 (:status @resp)))
+    (it "sets Location header to absolute url"
+        (should= (absolute-url @req @uri)
+                 (get-in @resp [:headers "Location"])))
+    (it "returns the resource in the body"
+        (should= "test" (response-get @resp "name"))))
 
-  (context "GET /lists/:id"
+  (context "/:id"
+    
+    (context "GET"
+      (with get-resp (app (mock/request :get @uri)))
 
-           (with get-resp (app (mock/request :get @uri)))
+      (it "status 200"
+          (should= 200 (:status @get-resp)))
+      (it "returns correct resource"
+          (should= (:body @resp) (:body @get-resp))))
 
-           (it "status 200"
-               (should= 200 (:status @get-resp)))
-           (it "returns correct resource"
-               (should= (:body @resp)
-                        (:body @get-resp))))
+    (context "DELETE"
+      (it "status 204"
+          (should= 204 (:status (app (mock/request :delete @uri))))))))
 
-  (context "DELETE /lists/:id"
+(describe "/lists/:id/todos"
 
-           (with del-resp (app (mock/request :delete @uri)))
-           (it "status 204"
-               (should= 204 (:status @del-resp)))))
+  (after-all (reset-db))
+
+  (with-all test-list (m/create-list! "Test List"))
+  (with-all list-id (:id @test-list))
+  (with-all req (mock/request :post (format "/lists/%s/todos" @list-id)))
+  (with-all resp (app @req))
+
+  (context "POST"
+
+    (it "status 201"
+        (should= 201 (:status @resp)))
+    (it "sets Location header"
+        (should (get-in @resp [:headers "Location"]))
+        (should= (absolute-url @req (format "/lists/%s/todos/%s" @list-id 1))
+                 (get-in @resp [:headers "Location"])))))
