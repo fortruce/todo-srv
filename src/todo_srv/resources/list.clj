@@ -1,14 +1,9 @@
 (ns todo-srv.resources.list
   (:require [todo-srv.models.list :as m]
             [ring.util.request :refer [request-url]]
+            [todo-srv.utils :refer [absolute-url]]
             [liberator.core :refer [defresource]])
   (:import [java.net URL]))
-
-(defn absolute-url
-  ([req] (absolute-url req "/"))
-  ([req uri]
-   (str (URL. (URL. (request-url req))
-              (if (clojure.string/blank? uri) "/" uri)))))
 
 (defn list-resource-malformed?
   [ctx]
@@ -28,7 +23,6 @@
                (if-not (nil? e)
                  {::entry e})))
   
-
 (defresource list-resource
   :allowed-methods [:post]
   :available-media-types ["application/json"]
