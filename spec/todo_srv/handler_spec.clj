@@ -4,6 +4,7 @@
             [ring.mock.request :as mock]
             [cheshire.core :refer [parse-string]]
             [todo-srv.models.list :as m]
+            [todo-srv.models.todo :as t]
             [todo-srv.utils :refer [absolute-url]]
             [todo-srv.database.utils :refer [reset-db]]))
 
@@ -57,8 +58,9 @@
 
   (with-all test-list (m/create-list! "Test List"))
   (with-all list-id (:id @test-list))
-  (with-all req (mock/request :post (format "/lists/%s/todos" @list-id)))
+  (with-all req (mock/request :post (format "/lists/%s/todos" @list-id) {:name "my todo"}))
   (with-all resp (app @req))
+  (with-all uri (format "/lists/%s/todos" @list-id))
 
   (context "POST"
 
@@ -66,5 +68,25 @@
         (should= 201 (:status @resp)))
     (it "sets Location header"
         (should (get-in @resp [:headers "Location"]))
-        (should= (absolute-url @req (format "/lists/%s/todos/%s" @list-id 1))
-                 (get-in @resp [:headers "Location"])))))
+        (should= (absolute-url @req (format "%s/%s" @uri 1))
+                 (get-in @resp [:headers "Location"])))
+    (it "returns the resource in body"
+        (should= "my todo"
+                 (response-get @resp "name")))
+    (it "is malformed if no name"
+        (should= 400
+                 (:status (app (mock/request :post @uri)))))
+    (it "is malformed if '' name"
+        (should= 400
+                 (:status (app (mock/request :post @uri {:name ""}))))))
+
+  (context "GET"
+
+    (before (t/create-todo! 1 "todo2"))
+
+    (with-all get-resp (app (mock/request :get @uri)))
+
+    (it "status 200"
+        (should= 200 (:status @get-resp)))
+    (it "returns all todos for list-id"
+        (should= 2 (count (json-response-body @get-resp))))))

@@ -10,19 +10,28 @@
 
   (after-all (reset-db))
 
-  ;; Violates foreing key constraint if we don't have a list to belong to
-  (before-all (l/create-list! "test list"))
+  ;; Violates foreign key constraint if we don't have a list to belong to
+  (before-all
+    (def test-list (l/create-list! "test list"))
+    (def todo1 (create-todo! 1 "todo1"))
+    (def todo2 (create-todo! 1 "todo2")))
 
   (context "create-todo!"
 
-    (with-all test-todo (create-todo! 1 "mytodo"))
-
     (it "creates todo in DB with 'name'"
-        (should= "mytodo"
-                 (:name (first (sql/query db ["SELECT name FROM todos WHERE id = ?" (:id @test-todo)])))))
+        (should= "todo1"
+                 (:name (first (sql/query db ["SELECT name FROM todos WHERE id = ?" (:id todo1)])))))
 
     (it "returns created todo"
-        (should= "mytodo" (:name @test-todo)))
+        (should= "todo1" (:name todo1)))
 
     (it "creates todo with correct list id"
-        (should= 1 (:lid @test-todo)))))
+        (should= 1 (:lid todo1))))
+
+  (context "get-todos"
+
+    (it "gets matching todos"
+        (should= (hash-set todo1 todo2)
+                 (apply hash-set (get-todos 1))))
+    (it "gets all todos with list-id"
+        (should= 2 (count (get-todos 1))))))
